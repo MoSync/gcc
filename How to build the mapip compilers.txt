@@ -1,0 +1,33 @@
+1. Create a directory inside gcc3
+2. Move into that directory.
+3. type:
+
+../configure --prefix=/usr/mapip --target=mapip --with-system-zlib
+
+4. Build the compilers with:
+make -k
+
+5. Once finished the compilers will be in ggc3/<YourBuildDir>/gcc/
+
+Notes
+-----
+
+To remake the compiler from scratch type:
+
+make clean
+make
+
+When modifying the compiler, remember to delete, all mapip*.o objects,
+then just use make agian, its worth noting that gcc can be built inside 
+gcc3/<YourBuildDir>/gcc/ or in gcc3/<YourBuildDir>.
+
+Reconfiguring
+-------------
+
+If you need to reconfigure the compiler you must always:
+
+make distclean
+
+before invoking the new configure.
+
+

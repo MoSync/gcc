@@ -1,0 +1,60 @@
+--- config.sub	Mon Jul 16 12:04:04 2001
++++ config.sub	Thu May 04 11:37:19 2006
+@@ -720,6 +741,14 @@
+ 	pentiumii-* | pentium2-*)
+ 		basic_machine=i686-`echo $basic_machine | sed 's/^[^-]*-//'`
+ 		;;
++	pip*)
++		basic_machine=pip-none
++		os=-vmgp
++		;;
++	mapip*)
++		basic_machine=mapip-none
++		os=-none
++		;;
+ 	pn)
+ 		basic_machine=pn-gould
+ 		;;
+
+--- gcc/config.gcc	Sun Nov 18 01:29:46 2001
++++ gcc/config.gcc	Thu May 04 11:37:19 2006
+@@ -231,6 +231,18 @@
+ mips*-*-*)
+ 	cpu_type=mips
+ 	;;
++pip*)
++	cpu_type=pip
++	;;
++mapip*)
++	cpu_type=mapip
++	;;
++mojave*)
++	cpu_type=mojave
++	;;
++ma*)
++	cpu_type=ma
++	;;
+ pj*-*-*)
+ 	cpu_type=pj
+ 	;;
+@@ -2754,6 +2766,19 @@
+ ns32k-*-openbsd*)
+ 	# Nothing special
+ 	;;
++
++pip*)
++	gas=yes
++	gnu_ld=yes
++	out_file="pip/pip-mod.c"
++	tm_file="${tm_file} pip/pip-mod.h"
++	;;
++mapip*)
++	gas=no
++	gnu_ld=no
++	out_file="mapip/mapip-mod.c"
++	tm_file="${tm_file} mapip/mapip-mod.h"
++	;;	
+ pj*-linux*)
+ 	tm_file="svr4.h pj/linux.h ${tm_file}"
+ 	;;
+

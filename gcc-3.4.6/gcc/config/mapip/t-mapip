@@ -1,0 +1,29 @@
+USE_COLLECT2=
+
+EXTRA_PARTS = crt0.o
+
+CRT0_S = $(srcdir)/config/mapip/crt0.s
+MCRT0_S = $(srcdir)/config/mapip/crt0.s
+
+LIBGCC1 = libgcc1-asm.a
+CROSS_LIBGCC1 = libgcc1-asm.a
+
+LIB1ASMSRC = mapip/mapip-sup.S
+LIB1ASMFUNCS = setjmp longjmp memcpy memmove memset
+
+FPBIT = fp-bit.c
+DPBIT = dp-bit.c
+
+dp-bit.c: $(srcdir)/config/fp-bit.c
+	echo '#define NO_NANS' > dp-bit.c
+	echo '#define NO_DENORMALS' >> dp-bit.c
+	cat $(srcdir)/config/fp-bit.c >> dp-bit.c
+
+fp-bit.c: $(srcdir)/config/fp-bit.c
+	echo '#define FLOAT' > fp-bit.c
+	echo '#define NO_NANS' >> fp-bit.c
+	echo '#define NO_DENORMALS' >> fp-bit.c
+	cat $(srcdir)/config/fp-bit.c >> fp-bit.c
+
+LIBGCC2_DEBUG_CFLAGS =
+TARGET_LIBGCC2_CFLAGS = -Dinhibit_libc -g0 -O2 -save-temps

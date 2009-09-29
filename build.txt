@@ -1,0 +1,4 @@
+configure.sh
+
+make all-gcc | tee make-gcc.log 2>&1
+make -k install-gcc | tee install-gcc.log 2>&1
