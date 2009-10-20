@@ -1567,6 +1567,7 @@ void mapip_gen_branch (operands, test)
 */
 		/* was - cmp1 = force_reg (mode, cmp1); */
 
+		cmp1 = force_reg (mode, cmp1);			/* I broke something, so I put this back ! */
 
 		rtx target = gen_reg_rtx (SImode);
 		target = force_reg (mode, target);
