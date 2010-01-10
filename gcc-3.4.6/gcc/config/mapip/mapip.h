@@ -176,7 +176,7 @@ do						\
 
 #define TARGET_PTRMEMFUNC_VBIT_LOCATION ptrmemfunc_vbit_in_delta
 
-//vbit in delta = ptrmemfunc_vbit_in_delta, in prefix = ptrmemfunc_vbit_in_pfn
+/*vbit in delta = ptrmemfunc_vbit_in_delta, in prefix = ptrmemfunc_vbit_in_pfn*/
 
 /* Everything is basically word-aligned */
 #define PARM_BOUNDARY		32
