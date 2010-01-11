@@ -1660,7 +1660,7 @@ const char * output_branch (insn, operands, rel8)
 
 	if (INTVAL(operands[2]) == 0)
 		return "jc   %C0,%1,zr,%3";
-
+#if 0
 	creg = mapip_is_const_reg( INTVAL(operands[2]) );
 
 	if (creg)
@@ -1670,7 +1670,7 @@ const char * output_branch (insn, operands, rel8)
 		sprintf(const_reg_jc, "jc   %%C0,%%1,r%d,%%3", creg);
 		return const_reg_jc;
 	}
-
+#endif
 	return "jc   %C0,%1,%2,%3";
 }
 

@@ -591,7 +591,7 @@
   [(set (pc)
 	(if_then_else (match_operator:SI 0 "comparison_operator"
 					 [(match_operand:SI 1 "register_operand" "r,r")
-					  (match_operand:SI 2 "general_operand" "r,i")])
+					  (match_operand:SI 2 "general_operand" "r,r")])
 		      (match_operand:SI 3 "branch_dest_operand" "")
 		      (pc)))]
   ""
