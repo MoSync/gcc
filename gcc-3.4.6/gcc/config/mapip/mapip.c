@@ -117,11 +117,6 @@ rtx cmp_ops[2];
 int mapip_call_used[FIRST_PSEUDO_REGISTER] = CALL_USED_REGISTERS;
 int mapip_fixed_regs[FIRST_PSEUDO_REGISTER] = FIXED_REGISTERS;
 
-#define CONST_REG_SIZE 128
-static int ConstTable[CONST_REG_SIZE];
-void mapip_gen_const_reg_table();
-int mapip_is_const_reg(int v);
-
 /****************************************
  
 ****************************************/
@@ -229,77 +224,6 @@ optimization_options (optimize, size)
 */
     printf ("\n");
 
-	mapip_gen_const_reg_table();
-}
-
-/****************************************
-
-****************************************/
-
-void mapip_gen_const_reg_table()
-{
-	int n, p;
-	int mask;
-
-	p = 32;
-		
-	memset(ConstTable,0, CONST_REG_SIZE * sizeof(int));
-
-	for (n=1;n<17;n++)
-	{
-		ConstTable[p++] = n;
-		ConstTable[p++] = -n;
-	}
-
-	mask = 0x20;
-
-	for (n=0;n<32-5;n++)
-	{
-		ConstTable[p++] = mask-1;
-		ConstTable[p++] = mask;
-		mask <<= 1;
-	}
-
-	mask = 0x10;
-
-	for (n=0;n<10;n++)
-	{
-		ConstTable[p++] = mask ^ 0xffffffff;
-		mask <<= 1;
-	}
-
-	return;
-}
-
-
-//***************************************
-//
-//***************************************
-
-int mapip_is_const_reg(int v)
-{
-	int *ConstPtr;
-	int n;
-
-	/* If constant optimization is off return not found */
-
-/*	if (ArgConstOpt == 0) */
-/*		return -1; */
-			
-	/* If value == 0 then return reg */
-	
-	if (v == 0)
-		return 0;
-
-	ConstPtr = &ConstTable[32];
-	
-	for (n=32;n<CONST_REG_SIZE;n++)
-	{	
-		if (v == *ConstPtr++)
-			return n;				/* Return reg number */
-	}
-	
-	return 0;						/* Not in table */
 }
 
 /***********************************
@@ -993,7 +917,6 @@ int SaveReg(int reg)
  
 ****************************************/
 
-
 #define SAVE_REGISTER_P(REGNO) \
   ((regs_ever_live[REGNO] && !call_used_regs[REGNO])			\
    || (REGNO == HARD_FRAME_POINTER_REGNUM && frame_pointer_needed) \
@@ -1557,91 +1480,103 @@ void mapip_gen_branch (operands, test)
      rtx operands[];
      enum rtx_code test;
 {
-	enum machine_mode mode;
-	rtx label;
-	rtx cmp0 = cmp_ops[0];
-	rtx cmp1 = cmp_ops[1];
-	rtx reg = 0;
-	int addr;
+  enum machine_mode mode;
+  rtx label;
+  rtx cmp0 = cmp_ops[0];
+  rtx cmp1 = cmp_ops[1];
+  rtx reg = 0;
+  int addr;
 
-	mode = GET_MODE (cmp0);
+  mode = GET_MODE (cmp0);
+  if (mode == VOIDmode)
+    mode = GET_MODE (cmp1);
 
-	// if mode of cmp0 is void change to the mode of cmp1
+  if (mode == VOIDmode)
+    mode = SImode;
 
-	if (mode == VOIDmode)
-		mode = GET_MODE (cmp1);
+  /* Generate branch destinations */
+  label = gen_rtx (LABEL_REF, VOIDmode, operands[0]);
 
-	// if mode is void force it to int
-
-	if (mode == VOIDmode)
-		mode = SImode;
-
-	/* Generate branch destinations */
-
-	label = gen_rtx (LABEL_REF, VOIDmode, operands[0]);
-
-	if (GET_CODE (cmp1) == CONST_INT)
-	{
-
-/*		if (!mapip_is_const_reg(INTVAL(cmp1)))
-			cmp1 = force_reg (mode, cmp1);
+  if (GET_CODE (cmp1) == CONST_INT)
+    {
+      /* Check if immediate compare operand fits the
+         constraints, otherwise force it to a register */
+		
+/*      if (((mode == SImode || mode == HImode)
+           && (INTVAL (cmp1) < -128
+               || INTVAL (cmp1) > 127))
+          || (mode != SImode && mode != QImode && mode != HImode))
 */
-		/* was - cmp1 = force_reg (mode, cmp1); */
 
-		cmp1 = force_reg (mode, cmp1);			/* I broke something, so I put this back ! */
+		/* Always force to register */
 
-		rtx target = gen_reg_rtx (SImode);
-		target = force_reg (mode, target);
-		emit_insn (gen_movsi (target, GEN_INT(INTVAL(cmp1)) ) );
+/*GOT HERE*/
 
-		/* Do the jump */
-
-		emit_jump_insn (gen_rtx_SET (VOIDmode, pc_rtx, gen_rtx_IF_THEN_ELSE (VOIDmode,
-						gen_rtx (test, mode, cmp0, target),
-						label, pc_rtx)));
-
-		return;
-
+        cmp1 = force_reg (mode, cmp1);
     }
   
-  	// compare reg with reg
-	// cmp1 is not a CONST_INT
-  
-	if (GET_MODE_SIZE(mode) < UNITS_PER_WORD)
-	{
-		int unsignedp = (test == GTU || test == GEU
-						|| test == LTU || test == LEU);
+  if (GET_MODE_SIZE(mode) < UNITS_PER_WORD
+      && GET_CODE (cmp1) != CONST_INT)
+    {
+      int unsignedp = (test == GTU || test == GEU
+		       || test == LTU || test == LEU);
 
-		/* Extend first operand */
-		rtx target = gen_reg_rtx (SImode);
+      /* Extend first operand */
+      rtx target = gen_reg_rtx (SImode);
 
-		if (unsignedp)
-			emit_insn (gen_rtx_SET (SImode, target, gen_rtx_ZERO_EXTEND(SImode, cmp0)));
-		else
-			emit_insn (gen_rtx_SET (SImode, target,	gen_rtx_SIGN_EXTEND(SImode, cmp0)));
+      if (unsignedp)
+        emit_insn (gen_rtx_SET (SImode, target,
+                                gen_rtx_ZERO_EXTEND(SImode, cmp0)));
+      else
+        emit_insn (gen_rtx_SET (SImode, target,
+                                gen_rtx_SIGN_EXTEND(SImode, cmp0)));
+      
+      emit_move_insn (cmp0, cmp0);
+      cmp0 = target;
+      
+      /* Extend second operand */
+      target = gen_reg_rtx (SImode);
+      
+      if (unsignedp)
+        emit_insn (gen_rtx_SET (SImode, target,
+                                gen_rtx_ZERO_EXTEND(SImode, cmp1)));
+      else
+        emit_insn (gen_rtx_SET (SImode, target,
+                                gen_rtx_SIGN_EXTEND(SImode, cmp1)));
+      
+      emit_move_insn (cmp1, cmp1);
+      cmp1 = target;
+      mode = SImode;
+    }
 
-		emit_move_insn (cmp0, cmp0);
-		cmp0 = target;
-
-		/* Extend second operand */
-		target = gen_reg_rtx (SImode);
-
-		if (unsignedp)
-			emit_insn (gen_rtx_SET (SImode, target, gen_rtx_ZERO_EXTEND(SImode, cmp1)));
-		else
-			emit_insn (gen_rtx_SET (SImode, target, gen_rtx_SIGN_EXTEND(SImode, cmp1)));
-
-		emit_move_insn (cmp1, cmp1);
-		cmp1 = target;
-		mode = SImode;
-	}
-
-	/* Do the jump */
-
-	emit_jump_insn (gen_rtx_SET (VOIDmode, pc_rtx, gen_rtx_IF_THEN_ELSE (VOIDmode,
-								gen_rtx (test, mode, cmp0, cmp1),
-								label, pc_rtx)));
+  /* Do the jump */
+  emit_jump_insn (gen_rtx_SET (VOIDmode, pc_rtx,
+                               gen_rtx_IF_THEN_ELSE (VOIDmode,
+                                                     gen_rtx (test, mode,
+                                                              cmp0, cmp1),
+                                                     label, pc_rtx)));
 }
+
+/*---------------------------------
+- 		No longer needed
+----------------------------------*/
+
+/*
+
+static int branch_dest (branch)
+     rtx branch;
+{
+  rtx dest = SET_SRC (PATTERN (branch));
+  int dest_uid;
+
+  if (GET_CODE (dest) == IF_THEN_ELSE)
+    dest = XEXP (dest, 1);
+  dest = XEXP (dest, 0);
+  dest_uid = INSN_UID (dest);
+  return INSN_ADDRESSES (dest_uid);
+}
+*/
+
 
 /*---------------------------------
 -	Output assembly to perform a
@@ -1649,29 +1584,17 @@ void mapip_gen_branch (operands, test)
 - 		No longer needed
 ----------------------------------*/
 
-//static char const_reg_jc[1024];
 
 const char * output_branch (insn, operands, rel8)
      rtx insn;
      rtx operands[];
      int rel8;
 {
-	int creg;
 
-	if (INTVAL(operands[2]) == 0)
-		return "jc   %C0,%1,zr,%3";
-#if 0
-	creg = mapip_is_const_reg( INTVAL(operands[2]) );
-
-	if (creg)
-	{	
-		char *const_reg_jc = ggc_alloc_string("", 64);
-
-		sprintf(const_reg_jc, "jc   %%C0,%%1,r%d,%%3", creg);
-		return const_reg_jc;
-	}
-#endif
-	return "jc   %C0,%1,%2,%3";
+  if (INTVAL(operands[2]) == 0)
+    return "jc   %C0,%1,zr,%3";
+  
+  return "jc   %C0,%1,%2,%3";
 }
 
 /*---------------------------------
@@ -1822,10 +1745,7 @@ int mapip_can_eliminate (from, to)
      int from;
      int to;
 {
-/* Old version
-
   int leaf = current_function_is_leaf;
-
   if (from == RETURN_ADDRESS_POINTER_REGNUM
       && (!leaf || (to == RA_REGNUM && leaf)))
     return 1;
@@ -1837,36 +1757,6 @@ int mapip_can_eliminate (from, to)
       return 1;
     }
   return 0;
-*/
-
-	int leaf = current_function_is_leaf;
-
-	if (from == RETURN_ADDRESS_POINTER_REGNUM)
-	{
-      if (!leaf)
-      	return 1;				/* Can eliminate */
-      	
-      if (to == RA_REGNUM)
-			return 1;			/* Can eliminate */
-	}
-	
-	if (from != RETURN_ADDRESS_POINTER_REGNUM)
-	{
-		if (to == HARD_FRAME_POINTER_REGNUM)
-		{
-			return 1;			/* Can eliminate */
-		}
-
-		if (to == STACK_POINTER_REGNUM)
-		{
-			if (!frame_pointer_needed)
-			{
-				return 1;		/* Can eliminate */
-			}
-		}
-	}
-
-	return 0;
 }
 
 /****************************************
@@ -2106,49 +1996,32 @@ bool mapip_ok_for_sibcall (tree decl, tree exp)
 
 static bool mapip_rtx_costs (rtx x, int code, int outer_code, int *total)
 {
-	switch (code)
-	{
-		case NOT:
-		case NEG:
-			*total = COSTS_N_INSNS (2);
-			return true;
-		case XOR:
-		case IOR:
-		case AND:
-		case PLUS:
-		case MINUS:
-		case ASHIFT:
-		case ASHIFTRT:
-		case LSHIFTRT:
-		case MULT:
-		{
-			rtx op = XEXP (x, 1);
-
-			/* if the src is a register it costs 1 */
-
-			if (GET_CODE(op) == REG)
-			{
-				*total = COSTS_N_INSNS (2);
-				return true;
-			}
-
-			/* if the src is a const_int that can be mapped to a const register it costs 1 */
-
-			if (GET_CODE(op) == CONST_INT)
-			{
-				if (mapip_is_const_reg(INTVAL(op)))
-				{
-					*total = COSTS_N_INSNS (1);
-				}
-			}
-
-			/* if the src is anything else it costs 2 */
-
-			*total = COSTS_N_INSNS (4);
-			return true;
-		}
-	}
-	return false;
+  switch (code) {
+  case NOT:
+  case NEG:
+    *total = COSTS_N_INSNS (2);
+	return true;
+  case XOR:
+  case IOR:
+  case AND:
+  case PLUS:
+  case MINUS:
+  case ASHIFT:
+  case ASHIFTRT:
+  case LSHIFTRT:
+  case MULT:
+    {
+      rtx op = XEXP (x, 1);
+      if (GET_CODE (op) == CONST_INT)
+      {
+		*total = COSTS_N_INSNS (2);
+		return true;
+	  }
+      *total = COSTS_N_INSNS (1);
+	  return true;
+    }
+  }
+  return false;
 }
 
 /****************************************

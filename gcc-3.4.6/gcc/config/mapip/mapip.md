@@ -573,20 +573,6 @@
 
 ;; Compare 32 bits with sign-extended 8-bit immediate with 8 bit displacement
 
-
-
-;(define_insn "branch_si"
-;  [(set (pc)
-;	(if_then_else (match_operator:SI 0 "comparison_operator"
-;					 [(match_operand:SI 1 "register_operand" "r,r")
-;					  (match_operand:SI 2 "general_operand" "r,r")])
-;		      (match_operand:SI 3 "branch_dest_operand" "")
-;		      (pc)))]
-; ""
-;;  "jc %C0 %1,%2,%3") 
-;  "* return output_branch (insn, operands, which_alternative == 1);")
-
-
 (define_insn "branch_si"
   [(set (pc)
 	(if_then_else (match_operator:SI 0 "comparison_operator"
