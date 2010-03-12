@@ -199,6 +199,58 @@
   srl  %0,%2
   srl  %0,%2")
 
+
+;;
+;; Floating point addition, subtraction, multplication and division
+;;
+(define_insn "addfi3"
+  [(set (match_operand:DF 0 "register_operand" "=r,r")
+	(plus:DF (match_operand:DF 1 "general_operand" "%0,0")
+		 (match_operand:DF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fadd  %0,%2
+   fadd  %0,%2")
+
+(define_insn "subfi3"
+  [(set (match_operand:DF 0 "register_operand" "=r,r")
+	(minus:DF (match_operand:DF 1 "register_operand" "0,0")
+		  (match_operand:DF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fsub  %0,%2
+   fsub  %0,%2")
+
+(define_insn "subdi3"
+  [(set (match_operand:QF 0 "register_operand" "=r,r")
+	(minus:QF (match_operand:QF 1 "register_operand" "0,0")
+		  (match_operand:QF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fsub  %0,%2
+   fsub  %0,%2")
+
+;; multiply
+(define_insn "mulfi3"
+  [(set (match_operand:DF 0 "register_operand" "=r,r")
+	(mult:DF (match_operand:DF 1 "register_operand" "0,0")
+		 (match_operand:DF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fmul  %0,%2
+   fmul  %0,%2")
+
+;; divide
+(define_insn "divfi3"
+  [(set (match_operand:DF 0 "register_operand" "=r,r")
+	(div:DF (match_operand:DF 1 "register_operand" "0,0")
+		(match_operand:DF 2 "general_operand" "r,i")))]
+  ""
+  "@
+  fdiv  %0,%2
+  fdiv  %0,%2")
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Extended arithmetic operations on 8 bit operands ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
