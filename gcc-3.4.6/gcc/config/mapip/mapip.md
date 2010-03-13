@@ -200,10 +200,49 @@
   srl  %0,%2")
 
 
-;;
-;; Floating point addition, subtraction, multplication and division
-;;
-(define_insn "addfi3"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Basic floating point arithmetic operations ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define_insn "addsf3"
+  [(set (match_operand:SF 0 "register_operand" "=r,r")
+	(plus:SF (match_operand:SF 1 "general_operand" "%0,0")
+		 (match_operand:SF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fadd  %0,%2
+   fadd  %0,%2")
+
+(define_insn "subsf3"
+  [(set (match_operand:SF 0 "register_operand" "=r,r")
+	(minus:SF (match_operand:SF 1 "register_operand" "0,0")
+		  (match_operand:SF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fsub  %0,%2
+   fsub  %0,%2")
+
+;; multiply
+(define_insn "mulsf3"
+  [(set (match_operand:SF 0 "register_operand" "=r,r")
+	(mult:SF (match_operand:SF 1 "register_operand" "0,0")
+		 (match_operand:SF 2 "general_operand" "r,i")))]
+  ""
+  "@
+   fmul  %0,%2
+   fmul  %0,%2")
+
+;; divide
+(define_insn "divsf3"
+  [(set (match_operand:SF 0 "register_operand" "=r,r")
+	(div:SF (match_operand:SF 1 "register_operand" "0,0")
+		(match_operand:SF 2 "general_operand" "r,i")))]
+  ""
+  "@
+  fdiv  %0,%2
+  fdiv  %0,%2")
+
+(define_insn "adddf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(plus:DF (match_operand:DF 1 "general_operand" "%0,0")
 		 (match_operand:DF 2 "general_operand" "r,i")))]
@@ -212,7 +251,7 @@
    fadd  %0,%2
    fadd  %0,%2")
 
-(define_insn "subfi3"
+(define_insn "subdf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(minus:DF (match_operand:DF 1 "register_operand" "0,0")
 		  (match_operand:DF 2 "general_operand" "r,i")))]
@@ -221,17 +260,8 @@
    fsub  %0,%2
    fsub  %0,%2")
 
-(define_insn "subdi3"
-  [(set (match_operand:QF 0 "register_operand" "=r,r")
-	(minus:QF (match_operand:QF 1 "register_operand" "0,0")
-		  (match_operand:QF 2 "general_operand" "r,i")))]
-  ""
-  "@
-   fsub  %0,%2
-   fsub  %0,%2")
-
 ;; multiply
-(define_insn "mulfi3"
+(define_insn "muldf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(mult:DF (match_operand:DF 1 "register_operand" "0,0")
 		 (match_operand:DF 2 "general_operand" "r,i")))]
@@ -241,7 +271,7 @@
    fmul  %0,%2")
 
 ;; divide
-(define_insn "divfi3"
+(define_insn "divdf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(div:DF (match_operand:DF 1 "register_operand" "0,0")
 		(match_operand:DF 2 "general_operand" "r,i")))]
@@ -250,6 +280,29 @@
   fdiv  %0,%2
   fdiv  %0,%2")
 
+;(define_insn "conv_sf_si"
+;  [(set (match_operand:SI 0 "register_operand" "=r")
+;	(float_extend:SF (match_operand:SI 1 "general_operand" "r")))]
+;  ""
+;  "fcfsi   %0,%1")
+
+;(define_insn "conv_df_si"
+;  [(set (match_operand:SI 0 "register_operand" "=r")
+;	(float_extend:DF (match_operand:SI 1 "general_operand" "r")))]
+;  ""
+;  "fcdsi   %0,%1")
+
+(define_insn "conv_si_sf"
+  [(set (match_operand:SI 0 "register_operand" "=r")
+	(sign_extend:SI (match_operand:SF 1 "general_operand" "r")))]
+  ""
+  "fcsif   %0,%1")
+
+(define_insn "conv_si_df"
+  [(set (match_operand:SI 0 "register_operand" "=r")
+	(sign_extend:SI (match_operand:DF 1 "general_operand" "r")))]
+  ""
+  "fcsid   %0,%1")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Extended arithmetic operations on 8 bit operands ;;
