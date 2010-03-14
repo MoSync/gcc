@@ -81,10 +81,30 @@
    (G13_REGNUM		29)
    (R0_REGNUM		30)
    (R1_REGNUM		31)
-   (LAST_HARD_REGNUM	31)
-   (RAP_REGNUM		32)
-   (ARG_REGNUM		33)
-   (CC_REGNUM		34)])
+
+   (FIRST_FLOAT_REG 32)
+   (FR0_REGNUM		32)
+   (FR1_REGNUM		33)
+   (FR2_REGNUM		34)
+   (FR3_REGNUM		35)
+   (FR4_REGNUM		36)
+   (FR5_REGNUM		37)
+   (FR6_REGNUM		38)
+   (FR7_REGNUM		39)
+   (FR8_REGNUM		40)
+   (FR9_REGNUM		41)
+   (FR10_REGNUM		42)
+   (FR11_REGNUM		43)
+   (FR12_REGNUM		44)
+   (FR13_REGNUM		45)
+   (FR14_REGNUM		46)
+   (FR15_REGNUM		47)   
+
+   (LAST_HARD_REGNUM	47)
+
+   (RAP_REGNUM		48)
+   (ARG_REGNUM		49)
+   (CC_REGNUM		50)])
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Basic arithmetic operations ;;

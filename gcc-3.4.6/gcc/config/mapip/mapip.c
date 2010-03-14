@@ -2062,7 +2062,24 @@ enum
 	REG_r12,
 	REG_r13,
 	REG_r14,
-	REG_r15
+	REG_r15,
+
+	REG_fr0,
+	REG_fr1,
+	REG_fr2,
+	REG_fr3,
+	REG_fr4,
+	REG_fr5,
+	REG_fr6,
+	REG_fr7,
+	REG_fr8,
+	REG_fr9,
+	REG_fr10,
+	REG_fr11,
+	REG_fr12,
+	REG_fr13,
+	REG_fr14,
+	REG_fr15
 };
 
 /****************************************

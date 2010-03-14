@@ -263,63 +263,65 @@ do						\
 /******************************
  * Register Usage
  ******************************/
-
 /*
-  $r0, $sp, $ra, $fp,	(0-3)
-  $s0 - $s7		(4-11)
-  $p0 - $p3		(12-15)
-  $g0 - $g15		(16-31)
-  $rap			(fake return pointer)
-  $arg			(fake arg pointer)
- */
+  -- ALU --
+  r0, sp, ra, fp,   (0-3)   -- Zero reg, stack, link, frame
+  s0 - s7           (4-11)  -- Callee save
+  $p0 - $p3         (12-15) -- Param regs
+  $g0 - $g15		(16-31) -- Caller save
+
+  -- FPU --
+  fr0 - fr3         (32-35) -- Param
+  fr4 - fr7		    (36-39) -- Callee save
+  fr8 - fr15		(40-47) -- Caller save
+
+  -- GCC --
+  rap               (48)    -- fake return pointer
+  arg			    (49)    -- fake arg pointer
+  cc                (50)    -- fake cc reg
+*/
 
 #define FIXED_REGISTERS		\
-{ 				\
-  1, 1, 1, 0,			\
+{ 				            \
+  1, 1, 1, 0,			    \
   0, 0, 0, 0, 0, 0, 0, 0,	\
-  0, 0, 0, 0,			\
+  0, 0, 0, 0,			    \
   0, 0, 0, 0, 0, 0, 0, 0,	\
   0, 0, 0, 0, 0, 0, 0, 0,	\
-  1, 1, 1			\
+  0, 0, 0, 0,               \
+  0, 0, 0, 0,            	\
+  0, 0, 0, 0, 0, 0, 0, 0,	\
+  1, 1, 1			        \
 }
 
 /* Register that are fixed or clobber over function calls */
 
 #define CALL_USED_REGISTERS	\
-{				\
-  1, 1, 1, 0,			\
+{				            \
+  1, 1, 1, 0,			    \
   0, 0, 0, 0, 0, 0, 0, 0,	\
-  1, 1, 1, 1,			\
+  1, 1, 1, 1,			    \
   1, 1, 1, 1, 1, 1, 1, 1,	\
   1, 1, 1, 1, 1, 1, 1, 1,	\
-  1, 1, 1			\
+  1, 1, 1, 1,               \
+  0, 0, 0, 0,               \
+  1, 1, 1, 1, 1, 1, 1, 1,	\
+  1, 1, 1			        \
 }
 
-/* The order in which registers are preferred to be allocated */
-/*
-
-#define REG_ALLOC_ORDER			\
-{					\
-  30, 12, 13, 14, 15,			\
-  16, 17, 18, 19, 20, 21, 22, 23, 	\
-  24, 25, 26, 27, 28, 29, 31, 3,	\
+#define REG_ALLOC_ORDER			        \
+{					                    \
+  30,                                   \
+  16, 17, 18, 19, 20, 21, 22, 23, 	    \
+  24, 25, 26, 27, 28, 29, 31, 3,	    \
   0,  4,  5,  6,  7,  8,  9,  10, 11,	\
-  2,  1,  RAP_REGNUM, ARG_REGNUM, CC_REGNUM	\
+  12, 13, 14, 15,                       \
+  2,  1,                                \
+  40, 41, 42, 43, 44, 45, 46, 47,       \
+  36, 37, 38, 39,                       \
+  32, 33, 34, 35,                       \
+  RAP_REGNUM, ARG_REGNUM, CC_REGNUM	    \
 }
-*/
-
-#define REG_ALLOC_ORDER			\
-{					\
-  30, 			\
-  16, 17, 18, 19, 20, 21, 22, 23, 	\
-  24, 25, 26, 27, 28, 29, 31, 3,	\
-  0,  4,  5,  6,  7,  8,  9,  10, 11,	\
-  12, 13, 14, 15, \
-  2,  1,  RAP_REGNUM, ARG_REGNUM, CC_REGNUM	\
-}
-
-/* !!! TEMP !!!
-#define ORDER_REGS_FOR_LOCAL_ALLOC mapip_order_regs_for_local_alloc*/
 
 #ifdef GCC_303
 #define ENCODE_SECTION_INFO(DECL) mapip_encode_section_info (DECL)
@@ -342,35 +344,92 @@ do						\
 
 #define AVOID_CCMODE_COPIES
 
-#define FIRST_PSEUDO_REGISTER 35
+#define FIRST_PSEUDO_REGISTER 48
 
-/* Register classes */
+/* 
+   Define the classes of registers for register constraints in the
+   machine description.  Also define ranges of constants.
+
+   One of the classes must always be named ALL_REGS and include all hard regs.
+   If there is more than one class, another class must be named NO_REGS
+   and contain no registers.
+
+   The name GENERAL_REGS must be the name of a class (or an alias for
+   another name such as ALL_REGS).  This is the class of registers
+   that is allowed by "g" or "r" in a register constraint.
+   Also, registers outside this class are allocated only when
+   instructions express preferences for them.
+
+   The classes must be numbered in nondecreasing order; that is,
+   a larger-numbered class must never be contained completely
+   in a smaller-numbered class.
+
+   For any two classes, it is very desirable that there be another
+   class that represents their union.  
+*/
 enum reg_class
 {
   NO_REGS,
   CC_REG,
+  GENERAL_REGS, 
+  FLOAT_REGS,
   ALL_REGS,
   LIM_REG_CLASSES
 };
 
 /* All registers are general registers */
-#define GENERAL_REGS ALL_REGS
+/*#define GENERAL_REGS ALL_REGS*/
 #define N_REG_CLASSES (int) LIM_REG_CLASSES
 #define REG_CLASS_NAMES	\
 {			\
   "NO_REGS",		\
   "CC_REG",		\
+  "GENERAL_REGS", \
+  "FLOAT_REGS", \
   "ALL_REGS"		\
 }
 
-#define REG_CLASS_CONTENTS	\
-{				\
-  {0x00000000, 0x00000000},	\
-  {0x00000000, 0x00000004},	\
-  {0xFFFFFFFF, 0x00000003}	\
+/*
+ * This define explains to GCC which registers will fit in which
+ * register class. They will be stored in the following structure
+ * ( in gcc/regclass.c ) 
+ *
+ *   #define N_REG_INTS ((FIRST_PSEUDO_REGISTER + (32 - 1)) / 32)
+ *   unsigned int_reg_class_contents[N_REG_CLASSES][N_REG_INTS]
+ *
+ * Each class is made out of N_REG_INTS number of unsigned integers
+ * where the first int is a bit mask for registers 0-31, the second
+ * mask, register 32-63 and so on.
+ *
+ * From GCC Internals:
+ * An initializer containing the contents of the register classes, as 
+ * integers which are bit masks. The nth integer specifies the contents 
+ * of class n. The way the integer mask is interpreted is that register 
+ * r is in the class if mask & (1 << r) is 1.
+ *
+ * When the machine has more than 32 registers, an integer does not 
+ * suffice. Then the integers are replaced by sub-initializers, braced 
+ * groupings containing several integers. Each sub-initializer must be 
+ * suitable as an initializer for the type HARD_REG_SET which is defined 
+ * in ‘hard-reg-set.h’. In this situation, the first integer in each 
+ * subinitializer corresponds to registers 0 through 31, the second integer 
+ * to registers 32 through 63, and so on.
+ *
+ */
+#define REG_CLASS_CONTENTS				        \
+{                                               \
+  {0x00000000, 0x00000000},	/* NO_REGS */		\
+  {0x00000000, 0x00040000},	/* CC_REG */		\
+  {0xffffffff, 0x00030000},	/* GENERAL_REGS */	\
+  {0x00000000, 0x0000ffff},	/* FLOAT_REGS */	\
+  {0xffffffff, 0xffffffff}  /* ALL_REGS */      \
 }
 
-#define REGNO_REG_CLASS(REGNO)	(((REGNO) < FIRST_PSEUDO_REGISTER) ? GENERAL_REGS : NO_REGS)
+#define REGNO_REG_CLASS(REGNO)	\
+  (((REGNO) < FIRST_PSEUDO_REGISTER) ? \
+	((REGNO >= 0 && REGNO < FIRST_FLOAT_REG) ? GENERAL_REGS : FLOAT_REGS) : \
+	NO_REGS)
+
 #define BASE_REG_CLASS		GENERAL_REGS
 #define INDEX_REG_CLASS		NO_REGS /* No index registers */
 
@@ -903,42 +962,38 @@ mapip_gen_internal_label(BUF, PFX, NUM)
 }
 
 /* Output of instructions */
-
-/*
-#define REGISTER_NAMES						\
-{								\
-    "$0", "$sp",  "$ra",  "$fp", 				\
-   "$s0", "$s1",  "$s2",  "$s3", "$s4", "$s5", "$s6", "$s7",	\
-   "$p0", "$p1",  "$p2",  "$p3", "$g0", "$g1", "$g2", "$g3",	\
-   "$g4", "$g5",  "$g6",  "$g7", "$g8", "$g9", "$g10","$g11",	\
-  "$g12","$g13", "$r0", "$r1", "$rap", "$arg", "cc"		\
-}
-*/
-
-#define REGISTER_NAMES						\
-{								\
-   "zr", "sp",  "rt",  "fr", 				\
-   "d0", "d1",  "d2",  "d3", "d4", "d5", "d6", "d7",	\
-   "i0", "i1",  "i2",  "i3", "r0", "r1", "r2", "r3",	\
-   "r4", "r5",  "r6",  "r7", "r8", "r9", "r10","r11",	\
-  "r12","r13", "r14", "r15", "rap", "arg", "cc"		\
+#define REGISTER_NAMES						                    \
+{								                                \
+   "zr", "sp",  "rt",  "fr", 			                        \
+   "d0", "d1",  "d2",  "d3", "d4", "d5", "d6", "d7",	        \
+   "i0", "i1",  "i2",  "i3", "r0", "r1", "r2", "r3",	        \
+   "r4", "r5",  "r6",  "r7", "r8", "r9", "r10","r11",	        \
+   "r12","r13", "r14", "r15",                                   \
+   "fr0", "fr1", "fr2", "fr3",                                  \
+   "fr4", "fr5", "fr6", "fr7",                                  \
+   "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",\
+   "rap", "arg", "cc"                                           \
 }
 
 
 #ifdef GCC_303
 /* Additional register names for the convenience of the inline
    assembler programmer */
-#define ADDITIONAL_REGISTER_NAMES					\
-{													\
-  {"zr", 0},										\
-  {"sp", 1}, {"rt", 2}, {"fr", 3}, {"d0", 4},		\
-  {"d1", 5}, {"d2", 6}, {"d3", 7}, {"d4", 8},		\
-  {"d5", 9}, {"d6", 10}, {"d7", 11}, {"i0", 12},	\
-  {"i1", 13}, {"i2", 14}, {"i3", 15}, {"r0", 16},	\
-  {"r1", 17}, {"r2", 18}, {"r3", 19}, {"r4", 20},	\
-  {"r5", 21}, {"r6", 22}, {"r7", 23}, {"r8", 24},	\
-  {"r9", 25}, {"r10", 26}, {"r11", 27}, {"r12", 28},\
-  {"r13", 29}, {"r14", 30}, {"r15", 31},			\
+#define ADDITIONAL_REGISTER_NAMES					       \
+{													       \
+  {"zr", 0},										       \
+  {"sp", 1}, {"rt", 2}, {"fr", 3}, {"d0", 4},		       \
+  {"d1", 5}, {"d2", 6}, {"d3", 7}, {"d4", 8},		       \
+  {"d5", 9}, {"d6", 10}, {"d7", 11}, {"i0", 12},	       \
+  {"i1", 13}, {"i2", 14}, {"i3", 15}, {"r0", 16},	       \
+  {"r1", 17}, {"r2", 18}, {"r3", 19}, {"r4", 20},	       \
+  {"r5", 21}, {"r6", 22}, {"r7", 23}, {"r8", 24},	       \
+  {"r9", 25}, {"r10", 26}, {"r11", 27}, {"r12", 28},       \
+  {"r13", 29}, {"r14", 30}, {"r15", 31},		           \
+  {"fr0", 0}, {"fr1", 1}, {"fr2", 2}, {"fr3", 3},          \
+  {"fr4", 4}, {"fr5", 5}, {"fr6", 6}, {"fr7", 7},          \
+  {"fr8", 8}, {"fr9", 9}, {"fr10", 10}, {"fr11", 11},      \
+  {"fr12", 12}, {"fr13", 13}, {"fr14", 14}, {"fr15", 15} \
 }
 #endif
 
