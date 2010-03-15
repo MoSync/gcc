@@ -2092,18 +2092,28 @@ int mapip_regno_mode_ok(unsigned int regno, enum machine_mode mode)
 {
 	args_in_regs = 4;
 
-	if (!mapip_archscale_string)
+	if (!mapip_archscale_string ||
+		(mapip_archscale_string && strcmp(mapip_archscale_string,"full") == 0) )
 	{
-		/* 32 Register mode */
+		/* 32+16 Register mode */
+		if ( regno >= 0 && regno <= 31 )
+	 	{	
+			if ( mode == SFmode || mode == DFmode )
+				return 0;
+
+			return 1;
+		}
+
+		else if ( regno >= 32 && regno <= 47 )
+	 	{	
+			if ( mode == SFmode || mode == DFmode )
+				return 1;
+
+			return 0;
+		}
 		return 1;
 	}
 
-	if (strcmp(mapip_archscale_string,"full") == 0)
-	{
-		/* 32 Register mode */
-		return 1;
-	}
-	
 	if (strcmp(mapip_archscale_string,"tiny") == 0)
 	{
 		/* 5 Register mode - sp, rt, fr, r14, r15 */

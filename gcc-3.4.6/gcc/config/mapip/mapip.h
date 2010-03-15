@@ -336,7 +336,14 @@ do						\
 /* Allow anything to be stored in any of the hard registers */
 /*#define HARD_REGNO_MODE_OK(REGNO, MODE) 1*/
 
-#define HARD_REGNO_MODE_OK(REGNO, MODE) mapip_regno_mode_ok(REGNO,MODE)
+/*#define HARD_REGNO_MODE_OK(REGNO, MODE) mapip_regno_mode_ok(REGNO,MODE) */
+#define HARD_REGNO_MODE_OK(REGNO, MODE) 				\
+  ((REGNO) >= 32 && (REGNO) <= 47 					\
+   ? (MODE) == SFmode || (MODE) == DFmode \
+   : (MODE) != DFmode)
+
+
+
 
 #define MODES_TIEABLE_P(MODE1, MODE2)	\
   (GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2) \
@@ -434,7 +441,11 @@ enum reg_class
 #define INDEX_REG_CLASS		NO_REGS /* No index registers */
 
 /* No special mapip register classes */
-#define REG_CLASS_FROM_LETTER(CHAR) ((CHAR) == 'C' ? CC_REG : NO_REGS)
+#define REG_CLASS_FROM_LETTER(C)	\
+ ((C) == 'C' ? CC_REG			\
+  : (C) == 'f' ? FLOAT_REGS		\
+  : NO_REGS)
+
 
 #define REGNO_OK_FOR_BASE_P(REGNO) \
   (REGNO_REG_CLASS (REGNO) == BASE_REG_CLASS)

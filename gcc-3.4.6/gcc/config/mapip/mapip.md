@@ -227,78 +227,92 @@
 (define_insn "addsf3"
   [(set (match_operand:SF 0 "register_operand" "=r,r")
 	(plus:SF (match_operand:SF 1 "general_operand" "%0,0")
-		 (match_operand:SF 2 "general_operand" "r,i")))]
+		 (match_operand:SF 2 "general_operand" "r,F")))]
   ""
   "@
-   fadd  %0,%2
-   fadd  %0,%2")
+   fadd.s  %0,%2
+   fadd.s  %0,%2")
 
 (define_insn "subsf3"
   [(set (match_operand:SF 0 "register_operand" "=r,r")
 	(minus:SF (match_operand:SF 1 "register_operand" "0,0")
-		  (match_operand:SF 2 "general_operand" "r,i")))]
+		  (match_operand:SF 2 "general_operand" "r,F")))]
   ""
   "@
-   fsub  %0,%2
-   fsub  %0,%2")
+   fsub.s  %0,%2
+   fsub.s  %0,%2")
 
 ;; multiply
 (define_insn "mulsf3"
   [(set (match_operand:SF 0 "register_operand" "=r,r")
 	(mult:SF (match_operand:SF 1 "register_operand" "0,0")
-		 (match_operand:SF 2 "general_operand" "r,i")))]
+		 (match_operand:SF 2 "general_operand" "r,F")))]
   ""
   "@
-   fmul  %0,%2
-   fmul  %0,%2")
+   fmul.s  %0,%2
+   fmul.s  %0,%2")
 
 ;; divide
 (define_insn "divsf3"
   [(set (match_operand:SF 0 "register_operand" "=r,r")
 	(div:SF (match_operand:SF 1 "register_operand" "0,0")
-		(match_operand:SF 2 "general_operand" "r,i")))]
+		(match_operand:SF 2 "general_operand" "r,F")))]
   ""
   "@
-  fdiv  %0,%2
-  fdiv  %0,%2")
+  fdiv.s  %0,%2
+  fdiv.s  %0,%2")
 
 (define_insn "adddf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(plus:DF (match_operand:DF 1 "general_operand" "%0,0")
-		 (match_operand:DF 2 "general_operand" "r,i")))]
+		 (match_operand:DF 2 "general_operand" "r,F")))]
   ""
   "@
-   fadd  %0,%2
-   fadd  %0,%2")
+   fadd.d  %0,%2
+   fadd.d  %0,%2")
 
 (define_insn "subdf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(minus:DF (match_operand:DF 1 "register_operand" "0,0")
-		  (match_operand:DF 2 "general_operand" "r,i")))]
+		  (match_operand:DF 2 "general_operand" "r,F")))]
   ""
   "@
-   fsub  %0,%2
-   fsub  %0,%2")
+   fsub.d  %0,%2
+   fsub.d  %0,%2")
 
 ;; multiply
 (define_insn "muldf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(mult:DF (match_operand:DF 1 "register_operand" "0,0")
-		 (match_operand:DF 2 "general_operand" "r,i")))]
+		 (match_operand:DF 2 "general_operand" "r,F")))]
   ""
   "@
-   fmul  %0,%2
-   fmul  %0,%2")
+   fmul.d  %0,%2
+   fmul.d  %0,%2")
 
 ;; divide
 (define_insn "divdf3"
   [(set (match_operand:DF 0 "register_operand" "=r,r")
 	(div:DF (match_operand:DF 1 "register_operand" "0,0")
-		(match_operand:DF 2 "general_operand" "r,i")))]
+		(match_operand:DF 2 "general_operand" "r,F")))]
   ""
   "@
-  fdiv  %0,%2
-  fdiv  %0,%2")
+  fdiv.d  %0,%2
+  fdiv.d  %0,%2")
+
+
+(define_insn "negsf2"
+  [(set (match_operand:SF 0 "register_operand" "=r")
+	(neg:SF (match_operand:SF 1 "register_operand" "r")))]
+  ""
+  "fneg.s %0,%1")
+
+(define_insn "negdf2"
+  [(set (match_operand:DF 0 "register_operand" "=r")
+	(neg:DF (match_operand:DF 1 "register_operand" "r")))]
+  ""
+  "fneg.d %0,%1")
+
 
 ;(define_insn "conv_sf_si"
 ;  [(set (match_operand:SI 0 "register_operand" "=r")
@@ -323,6 +337,8 @@
 	(sign_extend:SI (match_operand:DF 1 "general_operand" "r")))]
   ""
   "fcsid   %0,%1")
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Extended arithmetic operations on 8 bit operands ;;
@@ -887,28 +903,52 @@
 ;;     FLOATING POINT OPERATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;(define_insn "movsf"
-;  [(set (match_operand:SF 0 "nonimmediate_operand"	"=r,r,r,r,m,o")
-;	(match_operand:SF 1 "general_operand"		    " r,F,m,o,r,r"))]
-;  ""
-;  "@
-;   ld   %0,%1
-;   ld   %0,%1
-;   ld   %0,[%1]
-;   ld   %0,[%1]
-;   ld   [%0],%1
-;   ld   [%0],%1")
-
 
 (define_insn "movsf"
   [(set (match_operand:SF 0 "nonimmediate_operand" "=r,r,r,r,m,o")
-	(match_operand:SF 1 "general_operand"           " r,F,m,o,r,r"))]
+	(match_operand:SF 1 "general_operand"          " r,F,m,o,r,r"))]
   ""
-  "* return mapip_move_word (operands, TRUE);")
+  "@
+   fld.s	%0, %1
+   fld.s	%0, %1
+   fld.s	%0, [%1]
+   fld.s	%0, [%1]
+   fst.s	[%0], %1
+   fst.s	[%0], %1")
 
 (define_insn "movdf"
   [(set (match_operand:DF 0 "nonimmediate_operand" "=r,r,r,r,m,o")
-	(match_operand:DF 1 "general_operand"           " r,F,m,o,r,r"))]
+	(match_operand:DF 1 "general_operand"          " r,F,m,o,r,r"))]
   ""
-  "* return mapip_move_2words (operands, TRUE);")
+  "@
+   fld.d	%0, %1
+   fld.d	%0, %1
+   fld.d	%0, [%1]
+   fld.d	%0, [%1]
+   fst.d	[%0], %1
+   fst.d	[%0], %1")
+
+(define_insn "floatsisf2"
+  [(set (match_operand:SF 0 "register_operand" "=r")
+	(float:SF (match_operand:SI 1 "memory_operand" "m")))]
+  ""
+  "fldi.s	%0, [%1]")
+
+(define_insn "floatsidf2"
+  [(set (match_operand:DF 0 "register_operand" "=r")
+	(float:DF (match_operand:SI 1 "memory_operand" "m")))]
+  ""
+  "fldi.d	%0, [%1]")
+
+(define_insn "fix_truncsfsi2"
+  [(set (match_operand:SI 0 "memory_operand" "=m")
+	(fix:SI (match_operand:SF 1 "register_operand" "r")))]
+  ""
+  "fsti.s	[%0], %1")
+
+(define_insn "fix_truncdfsi2"
+  [(set (match_operand:SI 0 "memory_operand" "=m")
+	(fix:SI (match_operand:DF 1 "register_operand" "r")))]
+  ""
+  "fsti.d	[%0], %1")
 
