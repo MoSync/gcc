@@ -343,7 +343,7 @@ void mapip_output_mi_thunk(	FILE *file,
 {
 	fprintf (file, ";** MI THUNK BEGIN **\n");
 
-	fprintf (file, "add i0,#0x%x\n", delta);
+	fprintf (file, "add i0,#0x%lx\n", delta);
 
 	fprintf (file, "call &");
 	assemble_name (file, XSTR(XEXP(DECL_RTL(funcdecl),0),0));

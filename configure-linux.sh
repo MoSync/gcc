@@ -31,9 +31,9 @@ builddir=./build/gcc
 target=mapip
 progpref=mapip-
 
-export CFLAGS='-O2 -pipe'
-export CXXFLAGS='-O2 -pipe'
-export LDFLAGS='-s'
+export CFLAGS='-O2 -pipe -m32'
+export CXXFLAGS='-O2 -pipe -m32'
+export LDFLAGS='-s -m32'
 export DEBUG_FLAGS=''
 
 #---------------------------------------------------------------------------------
@@ -51,4 +51,6 @@ $SRCDIR/configure \
         --target=$target \
         --without-headers \
         --program-prefix=$progpref -v \
+	--build=i686-linux-gnu \
+	--host=i686-linux-gnu \
         2>&1 | tee gcc_configure.log
